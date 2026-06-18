@@ -163,11 +163,18 @@ if run_btn:
             results, summary = analyze_directory(all_dfs, params, sensors=active_sensors)
         st.session_state.results = results
         st.session_state.summary = summary
-        st.success(
-            f"Done: {len(results)} results  |  "
-            f"{(summary['quality']=='good').sum()} good  |  "
-            f"{(summary['model']=='HM').sum()} HM selected"
-        )
+        if summary.empty:
+            st.warning(
+                "No recognized sensor columns found in the uploaded file(s). "
+                "Check that column names match the supported sensors "
+                "(see the sidebar **Active Sensors** list)."
+            )
+        else:
+            st.success(
+                f"Done: {len(results)} results  |  "
+                f"{(summary['quality']=='good').sum()} good  |  "
+                f"{(summary['model']=='HM').sum()} HM selected"
+            )
 
 results = st.session_state.results
 summary = st.session_state.summary

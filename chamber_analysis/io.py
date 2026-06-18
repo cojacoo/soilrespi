@@ -9,6 +9,20 @@ import numpy as np
 import pandas as pd
 
 
+# Legacy logger firmware named columns gas-name-last (e.g. "SCD30 CO2 (ppm)").
+# The current format and GAS_META use gas-name-first ("CO2 SCD30 (ppm)").
+# Map the old names to canonical names so both formats analyse identically.
+_LEGACY_COLUMN_MAP = {
+    "SCD30 CO2 (ppm)":                            "CO2 SCD30 (ppm)",
+    "Vaisala GMP252 CO2 (ppm)":                   "CO2 Vaisala GMP252 (ppm)",
+    "SCD30 Temperature (degC)":                   "Temperature SCD30 (degC)",
+    "SDC30 Humidity (%relH)":                     "Humidity SDC30 (%relH)",
+    "SMT100 WaterContent (vol %)":                "WaterContent SMT100 (vol %)",
+    "SMT100 Temperature (degC)":                  "Temperature SMT100 (degC)",
+    "SMT100 Permittivity dielectric coefficient": "Permittivity dielectric coefficient SMT100 ",
+}
+
+
 def load_csv(file_path) -> pd.DataFrame:
     """Load a single chamber CSV file.
 
@@ -41,6 +55,7 @@ def load_csv(file_path) -> pd.DataFrame:
 
     parsed_rows = [row.split(";")[:n_cols] for row in data_lines]
     df = pd.DataFrame(parsed_rows, columns=header_vals)
+    df = df.rename(columns=_LEGACY_COLUMN_MAP)
 
     df["Timestamp"] = pd.to_datetime(
         df["Timestamp"], format="%d.%m.%Y %H:%M:%S", errors="coerce"
